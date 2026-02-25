@@ -1,38 +1,115 @@
 <!DOCTYPE html>
-<header>
-    <h1>ABOUT ME</h1>
-</header>
-<main>
-    <p>
-        This is my second "first page" in the course.
-    </p>
+<head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
 
-    <h2>My interests in 2026</h2>
-    <ul>
-        <li>Workout (like gym, yoga, spinning and more)</li>
-        <li>Learning Dutch</li>
-        <li>Learning D3.js</li>
-    </ul>
+    .bar {
+      fill: steelblue;
+    }
 
-    <h2>My top 3 movies</h2>
-    <ol>
-        <li>The Lord of the Rings</li>
-        <li>Harry Potter</li>
-        <li>Star Wars</li>
-    </ol>
+    .bar:hover {
+      fill: orange;
+    }
 
-    <h2>Link to my most visited website</h2>
-    <a href="https://www.youtube.com/">Youtube</a>
+    .axis text {
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+    <header>
+        <h1>ABOUT ME</h1>
+    </header>
+    <main>
+        <p>
+            This is my second "first page" in the course.
+        </p>
 
-    <h2>A new image at every refresh</h2>
-    <img 
-        src="https://picsum.photos/300/200"
-        alt="A photo I made in Budapest"
-        width="300"
-        height="200"
-    />
-</main>
-<footer>
-    <p>2026 - View source on <a href="https://github.com/lillar/d3xreact_course/tree/main">GitHub</a></p>
-</footer>
+        <h2>My interests in 2026</h2>
+        <ul>
+            <li>Workout (like gym, yoga, spinning and more)</li>
+            <li>Learning Dutch</li>
+            <li>Learning D3.js</li>
+        </ul>
+
+        <h2>My top 3 movies</h2>
+        <ol>
+            <li>The Lord of the Rings</li>
+            <li>Harry Potter</li>
+            <li>Star Wars</li>
+        </ol>
+
+        <h2>Link to my most visited website</h2>
+        <a href="https://www.youtube.com/">Youtube</a>
+
+        <h2>A new image at every refresh</h2>
+        <img 
+            src="https://picsum.photos/300/200"
+            alt="A photo I made in Budapest"
+            width="300"
+            height="200"
+        />
+
+        <h2>My AI-generated D3 chart</h2>
+        <div>
+            <svg width="600" height="300"></svg>
+            <script>
+                const data = [
+                { name: "A", value: 1 },
+                { name: "B", value: 5 },
+                { name: "C", value: 8 },
+                { name: "D", value: 10 }
+                ];
+
+                const svg = d3.select("svg"),
+                    margin = { top: 20, right: 20, bottom: 30, left: 40 },
+                    width = +svg.attr("width") - margin.left - margin.right,
+                    height = +svg.attr("height") - margin.top - margin.bottom;
+
+                const g = svg.append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+                // X scale (values)
+                const x = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.value)])
+                .range([0, width]);
+
+                // Y scale (categories)
+                const y = d3.scaleBand()
+                .domain(data.map(d => d.name))
+                .range([0, height])
+                .padding(0.2);
+
+                // Add bars
+                g.selectAll(".bar")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("y", d => y(d.name))
+                .attr("height", y.bandwidth())
+                .attr("x", 0)
+                .attr("width", d => x(d.value));
+
+                // Add X axis
+                g.append("g")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+                // Add Y axis
+                g.append("g")
+                .call(d3.axisLeft(y));
+
+            </script>
+            
+        </div>
+
+    </main>
+    <footer>
+        <p>2026 - View source on <a href="https://github.com/lillar/d3xreact_course/tree/main">GitHub</a></p>
+    </footer>
+</body>
 </html>
