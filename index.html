@@ -192,7 +192,22 @@
     //--------------------- Create the following eyes on the page ---------------------//
 
     //--------------------- Load Data ---------------------//
-    
+
+    // Define data parser for "M/D/YY" format
+    const parseTime = d3.timeParse("%m/%d/%y");
+
+    // Load csv from folder
+    d3.csv("https://raw.githubusercontent.com/lillar/d3xreact_course/refs/heads/main/data.csv").then(rawData => {
+        const data = rawData.map(d => {
+            return {
+                date: parseTime(d.Date),
+                value: +d["Move Minutes count"] || 0
+            };
+        }).filter(d => d.date !== null); // Ensure to skip invalid dates
+
+        console.log("Formatted data sample: ", data.slice(0, 5));
+    });
+
     //--------------------- Load Data ---------------------//
     
     
