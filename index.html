@@ -81,11 +81,48 @@
                 <p>    
                     See what I'm cooking in D3!
                 </p>
+                <div class="scrolly-container">
+                    <article class="story-column">
+                        <section class="step" data-step="2020">
+                            <h3>2020: The Beginning</h3>
+                            <p>In May 2020, I started tracking my activity. It was a modest start, capturing just the final months of the year.</p>
+                        </section>
+                        <section class="step" data-step="2021">
+                            <h3>2021: Finding a Rhythm</h3>
+                            <p>As 2021 progressed, the data began to show more consistency in my daily movements.</p>
+                        </section>
+                        <section class="step" data-step="2022">
+                            <h3>2022: Building Momentum</h3>
+                            <p>By 2022, the peaks grew taller as activity became a core part of my routine.</p>
+                        </section>
+                        <section class="step" data-step="2023">
+                            <h3>2023: Scaling Up</h3>
+                            <p>2023 saw significant growth in total active minutes compared to previous years.</p>
+                        </section>
+                        <section class="step" data-step="2024">
+                            <h3>2024: The Peak</h3>
+                            <p>Reaching new heights in activity levels throughout the year.</p>
+                        </section>
+                        <section class="step" data-step="yoy">
+                            <h3>Year-over-Year Growth</h3>
+                            <p>Look at the growth! From 1,461 minutes in 2020 to over 20,000 in 2025.</p>
+                        </section>
+                        <section class="step" data-step="cumsum">
+                            <h3>The Big Picture: Cumulative Sum</h3>
+                            <p>Transforming the data into a cumulative view shows the total journey over the years.</p>
+                        </section>
+                    </article>
+
+                    <div class="sticky-viz">
+                        <div id="viz-canvas"></div>
+                    </div>
+                </div>
             </div>
         </main>
         <footer>
         </footer>
  <script>
+    //--------------------- Create the following eyes on the page ---------------------//
     const width = 200;
     const height = 200;
 
@@ -152,6 +189,51 @@
             group.attr("transform", `translate(${d.cx + moveX}, ${d.cy + moveY})`);
         });
     });
+    //--------------------- Create the following eyes on the page ---------------------//
+
+    //--------------------- Load Data ---------------------//
+    
+    //--------------------- Load Data ---------------------//
+    
+    
+    //--------------------- Create D3 Scroll Logic ---------------------//
+    // Initialize visualization
+    const vizWidth = 500;
+    const vizHeight = 400;
+
+    const vizSVG = d3.select("#viz-canvas")
+        .append("svg")
+        .attr("width", vizWidth)
+        .attr("height", vizHeight);
+
+    // Function for transitions across steps
+    function updateViz(step) {
+        console.log("Entering step in story: ", step);
+
+        if (step === "2020") {
+            // Create d3 2020 area chart
+        } else if (step === "2021") {
+            // Create d3 2020-2021 area chart
+        } else if (step === "yoy") {
+            // Add YOY text in minutes and %
+        } else if (step === "cumsum") {
+            // Transform to cumsum line chart per year
+        }
+    }
+
+    // Scroll trigger logic
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const step = entry.target.getAttribute('data-step');
+                updateViz(step);
+            }
+        });
+    }, {threshold: 0.5}); // Triggers when 50% of the text is visible
+
+    document.querySelectorAll('.step').forEach(step => observer.observe(step));
+    //--------------------- Create D3 Scroll Logic ---------------------//
+    
 </script>
     </body>
 </html>
