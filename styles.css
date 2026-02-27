@@ -98,6 +98,7 @@ h2 {
    font-family: 'Montserrat', sans-serif;
    letter-spacing: 2px;
    padding-bottom: 14px;
+   color: #110325;
 }
 
 p {
@@ -167,6 +168,22 @@ div {
 .social-links a:hover {
   background-color: #57A6A1;   /* hover color */
   transform: translateY(-3px); /* subtle lift */
+}
+
+#contact {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#projects {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .zigzag-decor {
