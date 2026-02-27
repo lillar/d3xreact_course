@@ -1,115 +1,149 @@
 <!DOCTYPE html>
-<head>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
+<html lang="en"></html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Lilla learns D3</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+        <style>
+        </style>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About me</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+        <main >
+            <div id="home">
+                <h1>Hello you</h1>
+                <p>    
+                    Thank you for being a witness to my journey of conquering D3. Nice to see you here.
+                </p>
+            </div>
+            <div id="about">
+                <div class="about-container">
+                    <div class="about-img" id="eye-container">
+                        <div class="zigzag-decor">
+                            <div class="zigzag-small"></div>
+                            <div class="zigzag-small"></div>
+                        </div>
+                        <img src="me-2.png" alt="A picture of me">
+                    </div>
+                    <div class="about-text">
+                        <div class="about-intro">
+                            <h2>About Me</h2>
+                            <div class="zigzag"></div>
+                            <p>
+                            Growth happens at the edge of discomfort (I hope).
+                            That’s why I started this journey into D3 — again —. Not because it’s easy, 
+                            but because it is the next step when I think about data, design and storytelling.
+                            </p>
 
-    .bar {
-      fill: steelblue;
-    }
+                            <p>
+                            My background is rooted in analytics, where structure and clarity matter. 
+                            But I’m equally drawn to creativity — to the idea that numbers can feel 
+                            art when presented thoughtfully.
+                            </p>
 
-    .bar:hover {
-      fill: orange;
-    }
+                            <p>
+                            This website is my digital notebook. A place to experiment, 
+                            fail, iterate and improve — one visualization at a time.
+                            </p>
+                        </div>
+                        <div id="about-contact">
+                            <h2>Contact</h2>
+                            <div class="zigzag"></div>
+                            <p>Let's connect on Linkedin or check out my portfolio on Tableau Public!</p>
+                                <div class="social-links">
+                                <a href="https://www.linkedin.com/in/lillarasztik/" target="_blank" rel="noopener noreferrer">
+                                    <i class="fa-brands fa-linkedin-in"></i>
+                                </a>
 
-    .axis text {
-      font-size: 12px;
-    }
-  </style>
-</head>
-<body>
-    <header>
-        <h1>ABOUT ME</h1>
-    </header>
-    <main>
-        <p>
-            This is my second "first page" in the course.
-        </p>
+                                <a href="https://public.tableau.com/app/profile/lilla.rasztik/vizzes#!/" target="_blank" rel="noopener noreferrer">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                </a>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <footer>
+        </footer>
+ <script>
+    const width = 200;
+    const height = 200;
 
-        <h2>My interests in 2026</h2>
-        <ul>
-            <li>Workout (like gym, yoga, spinning and more)</li>
-            <li>Learning Dutch</li>
-            <li>Learning D3.js</li>
-        </ul>
+    const svg = d3.select("#eye-container")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .style("position", "absolute")
+        .style("top", "0")
+        .style("left", "0");
 
-        <h2>My top 3 movies</h2>
-        <ol>
-            <li>The Lord of the Rings</li>
-            <li>Harry Potter</li>
-            <li>Star Wars</li>
-        </ol>
+    const eyeData = [
+        { cx: 93, cy: 103 }, // Left Eye
+        { cx: 124, cy: 103 } // Right Eye
+    ];
 
-        <h2>Link to my most visited website</h2>
-        <a href="https://www.youtube.com/">Youtube</a>
+    // Create a group for each eye to move layers together
+    const eyeGroups = svg.selectAll(".eye-group")
+        .data(eyeData)
+        .enter()
+        .append("g")
+        .attr("class", "eye-group")
+        // Initial position
+        .attr("transform", d => `translate(${d.cx}, ${d.cy})`);
 
-        <h2>A new image at every refresh</h2>
-        <img 
-            src="https://picsum.photos/300/200"
-            alt="A photo I made in Budapest"
-            width="300"
-            height="200"
-        />
+    // LAYER 1: The Brown Iris (Oval)
+    eyeGroups.append("ellipse")
+        .attr("rx", 5) // Horizontal radius
+        .attr("ry", 7) // Vertical radius makes it oval
+        .attr("fill", "#634e34");
 
-        <h2>My AI-generated D3 chart</h2>
-        <div>
-            <svg width="600" height="300"></svg>
-            <script>
-                const data = [
-                { name: "A", value: 1 },
-                { name: "B", value: 5 },
-                { name: "C", value: 8 },
-                { name: "D", value: 10 }
-                ];
+    // LAYER 2: The Dark Pupil (Smaller Oval)
+    eyeGroups.append("ellipse")
+        .attr("rx", 3)
+        .attr("ry", 4)
+        .attr("fill", "#1a130c");
 
-                const svg = d3.select("svg"),
-                    margin = { top: 20, right: 20, bottom: 30, left: 40 },
-                    width = +svg.attr("width") - margin.left - margin.right,
-                    height = +svg.attr("height") - margin.top - margin.bottom;
+    // LAYER 3: The Cute Shine (Small off-white circle)
+    eyeGroups.append("circle")
+        .attr("cx", 1) // Positioned slightly top-left of center
+        .attr("cy", -4)
+        .attr("r", 1.5)
+        .attr("fill", "#fefaf0");
 
-                const g = svg.append("g")
-                .attr("transform", `translate(${margin.left},${margin.top})`);
+    d3.select("body").on("mousemove", (event) => {
+        const [mouseX, mouseY] = d3.pointer(event);
+        const boundingRect = document.querySelector('img').getBoundingClientRect();
 
-                // X scale (values)
-                const x = d3.scaleLinear()
-                .domain([0, d3.max(data, d => d.value)])
-                .range([0, width]);
-
-                // Y scale (categories)
-                const y = d3.scaleBand()
-                .domain(data.map(d => d.name))
-                .range([0, height])
-                .padding(0.2);
-
-                // Add bars
-                g.selectAll(".bar")
-                .data(data)
-                .enter()
-                .append("rect")
-                .attr("class", "bar")
-                .attr("y", d => y(d.name))
-                .attr("height", y.bandwidth())
-                .attr("x", 0)
-                .attr("width", d => x(d.value));
-
-                // Add X axis
-                g.append("g")
-                .attr("transform", `translate(0,${height})`)
-                .call(d3.axisBottom(x));
-
-                // Add Y axis
-                g.append("g")
-                .call(d3.axisLeft(y));
-
-            </script>
+        eyeGroups.each(function(d) {
+            const group = d3.select(this);
             
-        </div>
+            // Calculate absolute center of this eye on the page
+            const eyeX = boundingRect.left + d.cx;
+            const eyeY = boundingRect.top + d.cy;
 
-    </main>
-    <footer>
-        <p>2026 - View source on <a href="https://github.com/lillar/d3xreact_course/tree/main">GitHub</a></p>
-    </footer>
-</body>
+            const angle = Math.atan2(mouseY - eyeY, mouseX - eyeX);
+            
+            // Constrain movement so the oval stays within the eye socket
+            const distance = 1; 
+            const moveX = Math.cos(angle) * distance;
+            const moveY = Math.sin(angle) * distance;
+
+            // Use translate to move the entire group (Iris + Pupil + Shine)
+            group.attr("transform", `translate(${d.cx + moveX}, ${d.cy + moveY})`);
+        });
+    });
+</script>
+    </body>
 </html>
