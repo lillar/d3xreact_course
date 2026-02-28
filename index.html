@@ -205,21 +205,89 @@
             };
         }).filter(d => d.date !== null); // Ensure to skip invalid dates
 
+        const weekData=Array.from(
+            d3.rollup(data,v=>d3.sum(v,d=>d.value),d=>d3.timeWeek.floor(d.date)),
+            ([date,value])=>({date,value})
+            ).sort((a,b)=>a.date-b.date);
+        
+        data2020 = weekData.filter(d => d.date && d.date.getFullYear() === 2020);
+
         console.log("Formatted data sample: ", data.slice(0, 5));
+        console.log("Rows for 2020:", data2020.length);
+
+        // Set up sticky-viz
+        const vizWidth = 800;
+        const vizHeight = 600;
+
+        // Set up inner dimensions
+        const margin = {top: 20, right: 30, bottom: 40, left: 30};
+        const width = vizWidth - margin.left - margin.right;
+        const height = vizHeight - margin.top - margin.bottom;
+
+        // Set up svg
+    const svg = d3.select("#viz-canvas")
+        .append("svg")
+        // This defines the internal "zoom" box
+        .attr("viewBox", `0 0 ${vizWidth} ${vizHeight}`)
+        // This ensures it scales to fill the container
+        .attr("width", "100%")
+        .attr("height", "100%")
+        // Keeps it centered if the aspect ratio differs
+        .attr("preserveAspectRatio", "xMidYMid meet");
+
+    const mainGroup = svg.append("g")
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+        // Set up scales
+        const x = d3.scaleTime()
+            .domain([new Date(2020, 0, 1), new Date(2020, 11, 31)])
+            .range([0, width]);
+
+        const y = d3.scaleLinear()
+            .domain([0, d3.max(weekData, d => d.value)])
+            .range([height, 0]);
+
+        // Set up area
+        const area = d3. area()
+            .x(d => x(d.date))
+            .y0(y(0))
+            .y1(d => y(d.value))
+            .curve(d3.curveMonotoneX);
+
+        // Draw area for 2020
+        svg.append("path")
+            .datum(data2020)
+            .attr("class", "area-2020")
+            .attr("fill", "#57A6A1")
+            .attr("fill-opacity", 0.3)
+            .attr("stroke", "#f1ede5")
+            .attr("stroke-width", 0.2)
+            .attr("d", area);
+
+        // Add X Axis
+        /*
+        svg.append("g")
+            .attr("class", "x-axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).ticks(d3.timeMonth.every(1)).tickFormat(d3.timeFormat("%b")))
+            .attr("color", "#f1ede5")
+            .attr("fill-opacity", 0.3);
+
+
+        // Add Y Axis
+        
+        svg.append("g")
+            .attr("class", "y-axis")
+            .call(d3.axisLeft(y).ticks(5))
+            .attr("color", "#f1ede5")
+            .attr("fill-opacity", 0.3);
+        */
     });
 
     //--------------------- Load Data ---------------------//
     
     
     //--------------------- Create D3 Scroll Logic ---------------------//
-    // Initialize visualization
-    const vizWidth = 500;
-    const vizHeight = 400;
-
-    const vizSVG = d3.select("#viz-canvas")
-        .append("svg")
-        .attr("width", vizWidth)
-        .attr("height", vizHeight);
 
     // Function for transitions across steps
     function updateViz(step) {
