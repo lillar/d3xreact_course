@@ -100,7 +100,11 @@
                             <p>2023 saw significant growth in total active minutes compared to previous years.</p>
                         </section>
                         <section class="step" data-step="2024">
-                            <h3>2024: The Peak</h3>
+                            <h3>2024: Continue growing</h3>
+                            <p>Reaching new heights in activity levels throughout the year.</p>
+                        </section>
+                        <section class="step" data-step="2025">
+                            <h3>2025: The Peak</h3>
                             <p>Reaching new heights in activity levels throughout the year.</p>
                         </section>
                         <section class="step" data-step="yoy">
@@ -192,130 +196,140 @@
     //--------------------- Create the following eyes on the page ---------------------//
 
     //--------------------- Load Data ---------------------//
+    
+ // 1. Dimensions & Global Setup
+const viewWidth = 800;
+const viewHeight = 600;
+const margin = { top: 150, right: 30, bottom: 50, left: 80 };
+const vizWidth = viewWidth - margin.left - margin.right;
+const vizHeight = viewHeight - margin.top - margin.bottom;
 
-    // Define data parser for "M/D/YY" format
-    const parseTime = d3.timeParse("%m/%d/%y");
+let allData = []; // This will hold the aggregated weekly data
+let y; 
 
-    // Load csv from folder
-    d3.csv("https://raw.githubusercontent.com/lillar/d3xreact_course/refs/heads/main/data.csv").then(rawData => {
-        const data = rawData.map(d => {
-            return {
-                date: parseTime(d.Date),
-                value: +d["Move Minutes count"] || 0
-            };
-        }).filter(d => d.date !== null); // Ensure to skip invalid dates
+const svgJoy = d3.select("#viz-canvas")
+    .append("svg")
+    .attr("viewBox", `0 0 ${viewWidth} ${viewHeight}`)
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-        const weekData=Array.from(
-            d3.rollup(data,v=>d3.sum(v,d=>d.value),d=>d3.timeWeek.floor(d.date)),
-            ([date,value])=>({date,value})
-            ).sort((a,b)=>a.date-b.date);
-        
-        data2020 = weekData.filter(d => d.date && d.date.getFullYear() === 2020);
+const parseTime = d3.timeParse("%m/%d/%y");
 
-        console.log("Formatted data sample: ", data.slice(0, 5));
-        console.log("Rows for 2020:", data2020.length);
+// 2. The Drawing Function
+function drawYearArea(year, color, offset) {
+    if (allData.length === 0) return;
 
-        // Set up sticky-viz
-        const vizWidth = 800;
-        const vizHeight = 600;
+    // Filter for chosen year
+    const yearData = allData.filter(d => d.date.getFullYear() === year);
+    
+    // X Scale: Fixed Jan 1 - Dec 31
+    const x = d3.scaleTime()
+        .domain([new Date(year, 0, 1), new Date(year, 11, 31)])
+        .range([0, vizWidth]);
 
-        // Set up inner dimensions
-        const margin = {top: 20, right: 30, bottom: 40, left: 30};
-        const width = vizWidth - margin.left - margin.right;
-        const height = vizHeight - margin.top - margin.bottom;
+    const area = d3.area()
+        .x(d => x(d.date))
+        .y0(0)
+        .y1(d => y(d.value))
+        .curve(d3.curveMonotoneX);
 
-        // Set up svg
-    const svg = d3.select("#viz-canvas")
-        .append("svg")
-        // This defines the internal "zoom" box
-        .attr("viewBox", `0 0 ${vizWidth} ${vizHeight}`)
-        // This ensures it scales to fill the container
-        .attr("width", "100%")
-        .attr("height", "100%")
-        // Keeps it centered if the aspect ratio differs
-        .attr("preserveAspectRatio", "xMidYMid meet");
+    let group = svgJoy.select(`.year-group-${year}`);
+    
+    if (group.empty()) {
+        group = svgJoy.append("g")
+            .attr("class", `year-group-${year}`)
+            .attr("transform", `translate(0, ${vizHeight - offset})`);
 
-    const mainGroup = svg.append("g")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-        // Set up scales
-        const x = d3.scaleTime()
-            .domain([new Date(2020, 0, 1), new Date(2020, 11, 31)])
-            .range([0, width]);
-
-        const y = d3.scaleLinear()
-            .domain([0, d3.max(weekData, d => d.value)])
-            .range([height, 0]);
-
-        // Set up area
-        const area = d3. area()
-            .x(d => x(d.date))
-            .y0(y(0))
-            .y1(d => y(d.value))
-            .curve(d3.curveMonotoneX);
-
-        // Draw area for 2020
-        svg.append("path")
-            .datum(data2020)
-            .attr("class", "area-2020")
-            .attr("fill", "#57A6A1")
-            .attr("fill-opacity", 0.3)
+        group.append("path")
+            .datum(yearData)
+            .attr("fill", color)
+            .attr("fill-opacity", 0.4)
             .attr("stroke", "#f1ede5")
-            .attr("stroke-width", 0.2)
-            .attr("d", area);
+            .attr("stroke-width", 1.5)
+            .attr("d", area)
+            .style("opacity", 0)
+            .transition().duration(500)
+            .style("opacity", 1);
 
-        // Add X Axis
-        /*
-        svg.append("g")
-            .attr("class", "x-axis")
-            .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(x).ticks(d3.timeMonth.every(1)).tickFormat(d3.timeFormat("%b")))
-            .attr("color", "#f1ede5")
-            .attr("fill-opacity", 0.3);
-
-
-        // Add Y Axis
-        
-        svg.append("g")
-            .attr("class", "y-axis")
-            .call(d3.axisLeft(y).ticks(5))
-            .attr("color", "#f1ede5")
-            .attr("fill-opacity", 0.3);
-        */
-    });
-
-    //--------------------- Load Data ---------------------//
-    
-    
-    //--------------------- Create D3 Scroll Logic ---------------------//
-
-    // Function for transitions across steps
-    function updateViz(step) {
-        console.log("Entering step in story: ", step);
-
-        if (step === "2020") {
-            // Create d3 2020 area chart
-        } else if (step === "2021") {
-            // Create d3 2020-2021 area chart
-        } else if (step === "yoy") {
-            // Add YOY text in minutes and %
-        } else if (step === "cumsum") {
-            // Transform to cumsum line chart per year
+        group.append("text")
+            .attr("x", -15)
+            .attr("y", 5)
+            .attr("text-anchor", "end")
+            .attr("fill", "#f1ede5")
+            .style("font-family", "Inter")
+            .style("font-weight", "bold")
+            .text(year);
+            
+        // Add X-axis only for the base year (2020)
+        if (year === 2020) {
+            group.append("g")
+                .attr("transform", "translate(0,5)")
+                .call(d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat("%b")))
+                .call(g => g.select(".domain").remove())
+                .style("color", "#f1ede5");
         }
     }
+}
 
-    // Scroll trigger logic
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const step = entry.target.getAttribute('data-step');
-                updateViz(step);
-            }
-        });
-    }, {threshold: 0.5}); // Triggers when 50% of the text is visible
+// 3. Data Loading & Aggregation
+const dataUrl = "https://raw.githubusercontent.com/lillar/d3xreact_course/refs/heads/main/data.csv";
 
-    document.querySelectorAll('.step').forEach(step => observer.observe(step));
-    //--------------------- Create D3 Scroll Logic ---------------------//
+d3.csv(dataUrl).then(rawData => {
+    // A. Parse and Clean
+    const formattedData = rawData.map(d => ({
+        date: parseTime(d.Date),
+        value: +d["Move Minutes count"] || 0
+    })).filter(d => d.date !== null);
+
+    // B. Aggregate to Weekly Sums
+    // We use d3.timeWeek to group dates by the start of their week
+    const weeklyGroups = d3.groups(formattedData, d => d3.timeWeek(d.date));
+    
+    allData = weeklyGroups.map(([monday, values]) => ({
+        date: monday,
+        value: d3.sum(values, v => v.value)
+    }));
+
+    // C. Set Global Y Scale (Negative range to draw peaks UP)
+    y = d3.scaleLinear()
+        .domain([0, d3.max(allData, d => d.value)])
+        .range([0, -150]); 
+
+    // Trigger initial view
+    updateViz("2020");
+});
+
+// 4. Update Function called by Scroll
+function updateViz(step) {
+    let offset = 50;
+
+    if (step === "2020") {
+        drawYearArea(2020, "#f1ede5", 0);
+    } else if (step === "2021") {
+        drawYearArea(2021, "#f1ede5", offset);
+    } else if (step === "2022") {
+        drawYearArea(2022, "#f1ede5", offset*2);
+    } else if (step === "2023") {
+        drawYearArea(2023, "#f1ede5", offset*3);
+    } else if (step === "2024") {
+        drawYearArea(2024, "#f1ede5", offset*4);
+    } else if (step === "2025") {
+        drawYearArea(2025, "#f1ede5", offset*5);
+    }
+}
+
+// 5. Intersection Observer
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const step = entry.target.getAttribute('data-step');
+            updateViz(step);
+        }
+    });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.step').forEach(step => observer.observe(step));
     
 </script>
     </body>
