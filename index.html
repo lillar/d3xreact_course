@@ -275,6 +275,8 @@ function drawYearArea(year, color, offset) {
 // 3. Data Loading & Aggregation
 const dataUrl = "https://raw.githubusercontent.com/lillar/d3xreact_course/refs/heads/main/data.csv";
 
+let steps = [];
+
 d3.csv(dataUrl).then(rawData => {
     // A. Parse and Clean
     const formattedData = rawData.map(d => ({
@@ -296,40 +298,74 @@ d3.csv(dataUrl).then(rawData => {
         .domain([0, d3.max(allData, d => d.value)])
         .range([0, -150]); 
 
+    // Get years from data to populate in steps
+    const uniqueYears = Array.from(new Set(allData.map(d => d.date.getFullYear()))).sort();
+
+    // Map years to string for data-step attributes
+    steps = uniqueYears.map(year => year.toString());
+
+    // Add last 2 steps of scrolly
+    steps.push("yoy", "cumsum");
+
+    // NOW start observing, once steps is defined
+    document.querySelectorAll('.step').forEach(step => observer.observe(step));
+    
     // Trigger initial view
-    updateViz("2020");
+    updateViz(steps[0]);
 });
 
 // 4. Update Function called by Scroll
-function updateViz(step) {
-    let offset = 50;
 
-    if (step === "2020") {
-        drawYearArea(2020, "#f1ede5", 0);
-    } else if (step === "2021") {
-        drawYearArea(2021, "#f1ede5", offset);
-    } else if (step === "2022") {
-        drawYearArea(2022, "#f1ede5", offset*2);
-    } else if (step === "2023") {
-        drawYearArea(2023, "#f1ede5", offset*3);
-    } else if (step === "2024") {
-        drawYearArea(2024, "#f1ede5", offset*4);
-    } else if (step === "2025") {
-        drawYearArea(2025, "#f1ede5", offset*5);
+function removeYearArea(year) {
+    const group = svg.select(`.year-group-${year}`);
+    
+    if (!group.empty()) {
+        group.transition()
+            .duration(500)
+            .style("opacity", 0)
+            .remove(); // Removes the element from the SVG entirely
+    }
+}
+
+function updateViz(step) {
+    const year = parseInt(step);
+    
+    // If it's a year step
+    if (!isNaN(year)) {
+        const index = steps.indexOf(step);
+        const offset = index * 50; // Shift each year up by 60 units
+        
+        // Alternate colors or use a scale
+        const color = index % 2 === 0 ? "#57A6A1" : "#f1ede5";
+        
+        drawYearArea(year, color, offset);
+    } 
+    // Handle special steps
+    else if (step === "yoy") {
+        //showYoYComparison();
+    } 
+    else if (step === "cumsum") {
+        //showCumulativeChart();
     }
 }
 
 // 5. Intersection Observer
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
+        const step = entry.target.getAttribute('data-step');
+        const index = steps.indexOf(step);
+
         if (entry.isIntersecting) {
-            const step = entry.target.getAttribute('data-step');
             updateViz(step);
+        } else {
+            // Check if user is scrolling UP (leaving the step towards the bottom of the screen)
+            // If the element's top is positive, it's moving down/out, meaning we are moving UP the page
+            if (entry.boundingClientRect.top > 0 && !isNaN(parseInt(step))) {
+                removeYearArea(step);
+            }
         }
     });
 }, { threshold: 0.5 });
-
-document.querySelectorAll('.step').forEach(step => observer.observe(step));
     
 </script>
     </body>
